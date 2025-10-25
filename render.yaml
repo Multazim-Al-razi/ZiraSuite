@@ -13,3 +13,5 @@ services:
         value: https://efoifbextrouwrutykiq.supabase.co
       - key: SUPABASE_ANON_KEY
         value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVmb2lmYmV4dHJvdXdydXR5a2lxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE0MDcyNDAsImV4cCI6MjA3Njk4MzI0MH0.j33oRZfPiJZ4oZu2ZiTBq67sZwRZrgItBnFuEeEaL7w
+      - key: MANAGER_SERVER_URL
+        value: http://localhost:8080  # The ManagerServer will run on port 8080 inside the container

@@ -10,13 +10,15 @@ This project implements a complete authentication system using Supabase for the 
 - **Secure Cookies**: HttpOnly, secure, and sameSite cookies for session storage
 - **Error Handling**: Comprehensive authentication error handling and logging
 - **Responsive UI**: Clean, responsive login interface
+- **Integration**: Proxy gateway to existing ManagerServer application
 
 ## Architecture
 
 - **Frontend**: HTML, CSS, JavaScript for login interface
-- **Backend**: Node.js/Express server with authentication middleware
+- **Gateway**: Node.js/Express server with authentication middleware
 - **Authentication**: Supabase Auth service
 - **Session Management**: Custom session management with timeout
+- **Proxy**: http-proxy-middleware to forward authenticated requests to ManagerServer
 - **Deployment**: Docker container ready for Render deployment
 
 ## Configuration
@@ -25,6 +27,15 @@ The application is pre-configured with your Supabase project credentials:
 
 - **Supabase URL**: `https://efoifbextrouwrutykiq.supabase.co`
 - **Environment**: Production
+
+## Integration with ManagerServer
+
+This gateway application handles authentication before forwarding requests to the existing ManagerServer application:
+
+- All requests first pass through authentication validation
+- Authenticated requests are forwarded to the ManagerServer
+- Unauthenticated requests are redirected to the login page
+- User information is passed to ManagerServer via headers
 
 ## Deployment
 
@@ -46,7 +57,7 @@ The application is configured for deployment to Render with:
 
 ## Files Included
 
-- `server.js` - Main application server
+- `server.js` - Main gateway server with authentication and proxy
 - `config/supabase.js` - Supabase client configuration
 - `middleware/auth.js` - Authentication middleware
 - `src/controllers/authController.js` - Authentication endpoints
@@ -73,6 +84,7 @@ The following environment variables are configured for production:
 
 - `SUPABASE_URL`: Your Supabase project URL
 - `SUPABASE_ANON_KEY`: Your Supabase anon key
+- `MANAGER_SERVER_URL`: URL of the ManagerServer application (default: http://localhost:8080)
 - `NODE_ENV`: Set to "production"
 
 ## MCP Connection
@@ -91,6 +103,7 @@ For issues with the authentication system, check:
 1. Supabase project configuration in your dashboard
 2. Network connectivity to Supabase services
 3. Environment variables in your deployment platform
+4. Connection to the ManagerServer application
 
 ---
 

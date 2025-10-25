@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  # Placeholder for ManagerServer - you'll need to configure this based on your specific ManagerServer setup
+ # This is a template - adjust according to your ManagerServer-linux-x64 requirements
+  manager-server:
+    # You'll need to create a proper Dockerfile for ManagerServer-linux-x64
+    # This is a placeholder that assumes you have a Dockerfile for ManagerServer
+    build:
+      context: ../../../../ManagerServer-linux-x64
+      dockerfile: Dockerfile  # You'll need to create this for your ManagerServer
+    container_name: manager-server
+    ports:
+      - "8080:8080"  # Adjust port as needed for your ManagerServer
+    # environment:
+    #   - PORT=8080  # Adjust based on your ManagerServer configuration
+    restart: unless-stopped
+
+  auth-gateway:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: auth-gateway
+    ports:
+      - "3000:3000"
+    depends_on:
+      - manager-server
+    environment:
+      - NODE_ENV=production
+      - SUPABASE_URL=https://efoifbextrouwrutykiq.supabase.co
+      - SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVmb2lmYmV4dHJvdXdydXR5a2lxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE0MDcyNDAsImV4cCI6MjA3Njk4MzI0MH0.j33oRZfPiJZ4oZu2ZiTBq67sZwRZrgItBnFuEeEaL7w
+      - MANAGER_SERVER_URL=http://manager-server:8080
+    restart: unless-stopped
+
+networks:
+  default:
+    name: zira-suite-network

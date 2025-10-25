@@ -2,6 +2,7 @@ import express from 'express';
 import cookieParser from 'cookie-parser';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { createProxyMiddleware } from 'http-proxy-middleware';
 
 import authRoutes from './routes/auth.js';
 import { authGuard } from './src/auth/session/authGuard.js';
@@ -69,9 +70,47 @@ app.get('/api/data', requireAuth, (req, res) => {
   });
 });
 
-// Health check endpoint
+// Proxy middleware to forward requests to the existing ManagerServer application
+// This will handle authentication first, then forward authorized requests to the ManagerServer
+const managerServerProxy = createProxyMiddleware({
+  target: process.env.MANAGER_SERVER_URL || 'http://manager-server:8080', // Default to manager-server service
+  changeOrigin: true,
+  onProxyReq: (proxyReq, req, res) => {
+    // Add authentication information to the forwarded request if needed
+    if (req.user) {
+      proxyReq.setHeader('x-user-id', req.user.id);
+      proxyReq.setHeader('x-user-email', req.user.email);
+    }
+  },
+  onError: (err, req, res) => {
+    console.error('Proxy error:', err);
+    // If ManagerServer is not available, provide a helpful error message
+    res.status(500).send(`
+      <h1>Service Temporarily Unavailable</h1>
+      <p>The ManagerServer application is not currently accessible.</p>
+      <p>Please check that the MANAGER_SERVER_URL environment variable is correctly configured.</p>
+      <a href="/login">Login</a>
+    `);
+  }
+});
+
+// Route all other requests (that are not auth-related) to the ManagerServer
+// But only if the user is authenticated
+app.use('*', requireAuth, managerServerProxy);
+
+// Health check endpoint for the integrated application
 app.get('/', (req, res) => {
-  res.send('<h1>Supabase Auth Integration - Home</h1><a href="/login">Login</a>');
+  if (req.user) {
+    // If authenticated, redirect to the ManagerServer application
+    res.redirect('/dashboard'); // or wherever the main application starts
+  } else {
+    // If not authenticated, show the login page link
+    res.send(`
+      <h1>Zira Suite - Supabase Auth Gateway</h1>
+      <p>This server handles authentication before forwarding requests to the ManagerServer application.</p>
+      <a href="/login">Login</a>
+    `);
+  }
 });
 
 // Error handling middleware
@@ -82,6 +121,9 @@ app.use((err, req, res, next) => {
 
 // Start server
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`Authentication Gateway running on port ${PORT}`);
   console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`Forwarding authenticated requests to ManagerServer at: ${process.env.MANAGER_SERVER_URL || 'http://manager-server:8080'}`);
 });
+
+export default app;

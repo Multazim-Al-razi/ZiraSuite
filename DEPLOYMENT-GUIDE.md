@@ -38,12 +38,20 @@ The following files are already configured for Render deployment:
    - Region: Oregon
    - Plan: Free
    - Branch: main
-   - Environment variables (SUPABASE_URL and SUPABASE_ANON_KEY) are already configured
+   - Environment variables (SUPABASE_URL, SUPABASE_ANON_KEY, and MANAGER_SERVER_URL) are already configured
 
-### 3. Monitor Deployment
-- Render will automatically build and deploy your application
+### 3. ManagerServer Integration
+**Important**: This application acts as an authentication gateway for your existing ManagerServer application. For full functionality:
+
+1. You'll need to deploy your ManagerServer-linux-x64 application separately
+2. Update the `MANAGER_SERVER_URL` environment variable in Render to point to your ManagerServer instance
+3. The authentication gateway will forward authenticated requests to your ManagerServer
+
+### 4. Monitor Deployment
+- Render will automatically build and deploy your authentication gateway
 - You can monitor the build logs in the Render dashboard
-- Once deployed, your application will be accessible at the URL provided by Render
+- Once deployed, your authentication gateway will be accessible at the URL provided by Render
+- Remember to update the `MANAGER_SERVER_URL` to point to your actual ManagerServer application
 
 ## Application Features
 
@@ -60,25 +68,37 @@ The following files are already configured for Render deployment:
 - Email/password authentication
 - Session validation
 
+### Gateway Functionality
+- Acts as a proxy between users and the ManagerServer
+- All requests are authenticated before being forwarded
+- User information is passed to ManagerServer via headers
+- Maintains the existing ManagerServer functionality
+
 ## Post-Deployment
 
 ### 1. Verify Deployment
-- Access your application using the Render URL
+- Access your authentication gateway using the Render URL
 - Test the login functionality
 - Verify protected routes work correctly
 - Test session timeout behavior
 
-### 2. Security Considerations
+### 2. Connect to ManagerServer
+- Ensure your ManagerServer application is deployed and accessible
+- Update the `MANAGER_SERVER_URL` environment variable in Render if needed
+- Test the complete flow: login → authenticated access to ManagerServer
+
+### 3. Security Considerations
 - The .env file is in .gitignore and will not be pushed to the repository
 - Environment variables are configured in Render dashboard
 - Secure cookies are enabled (httpOnly, secure, sameSite)
 
-### 3. Troubleshooting
+### 4. Troubleshooting
 If you encounter issues:
 - Check the Render logs in the dashboard
 - Verify your Supabase project is accessible
-- Ensure the environment variables are correctly set in Render
-- Confirm your Supabase authentication settings allow your domain
+- Ensure the MANAGER_SERVER_URL is correctly configured
+- Confirm your ManagerServer application is running and accessible
+- Test locally before deployment using: `node server.js`
 
 ## MCP Connection
 
@@ -94,6 +114,6 @@ For deployment issues:
 1. Check Render build logs
 2. Verify Supabase project configuration
 3. Confirm environment variables are set correctly
-4. Test locally before deployment using: `node server.js`
+4. Ensure ManagerServer is accessible from the gateway
 
-Your application is production-ready and configured for immediate deployment to Render!
+Your authentication gateway is production-ready and configured for immediate deployment to Render!

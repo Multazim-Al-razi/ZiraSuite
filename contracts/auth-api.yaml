@@ -1,0 +1,235 @@
+openapi: 3.0.0
+info:
+  title: Supabase Authentication API
+  description: API for handling user authentication with Supabase
+ version: 1.0.0
+servers:
+  - url: https://your-render-app-url.onrender.com/api/auth
+    description: Production server
+  - url: http://localhost:3000/api/auth
+    description: Development server
+
+paths:
+ /login:
+    post:
+      summary: Authenticate user and create session
+      description: Authenticates a user with email and password, creates a session if valid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                  description: User's email address
+                  example: user@example.com
+                password:
+                  type: string
+                  format: password
+                  description: User's password
+                  example: securePassword123
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  user:
+                    $ref: '#/components/schemas/User'
+                  message:
+                    type: string
+                    example: "Login successful"
+        '400':
+          description: Bad request - missing email or password
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized - invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /logout:
+    post:
+      summary: Logout user and destroy session
+      description: Logs out the current user and destroys their session
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Logout successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Logout successful"
+        '401':
+          description: Unauthorized - invalid or expired session
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /session:
+    get:
+      summary: Get current session information
+      description: Retrieves information about the current authenticated session
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Session information retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    $ref: '#/components/schemas/User'
+                  session:
+                    $ref: '#/components/schemas/Session'
+        '401':
+          description: Unauthorized - invalid or expired session
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique user identifier from Supabase
+          example: "auth0-user-12345"
+        email:
+          type: string
+          format: email
+          description: User's email address
+          example: user@example.com
+        emailVerified:
+          type: boolean
+          description: Whether the user's email has been verified
+          example: true
+        createdAt:
+          type: string
+          format: date-time
+          description: When the user account was created
+          example: "2023-01-15T10:30:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          description: When the user account was last updated
+          example: "2023-06-20T14:45:0Z"
+        lastSignInAt:
+          type: string
+          format: date-time
+          description: When the user last signed in
+          example: "2023-10-25T17:30:00Z"
+        role:
+          type: string
+          description: User's role in the application
+          example: "accountant"
+        isActive:
+          type: boolean
+          description: Whether the user account is active
+          example: true
+
+    Session:
+      type: object
+      properties:
+        sessionId:
+          type: string
+          description: Unique identifier for the session
+          example: "sess_abc123def456"
+        userId:
+          type: string
+          description: Reference to the authenticated user
+          example: "auth0-user-12345"
+        jwtToken:
+          type: string
+          description: JWT token for session validation
+          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        createdAt:
+          type: string
+          format: date-time
+          description: When the session was created
+          example: "2023-10-25T17:30:00Z"
+        expiresAt:
+          type: string
+          format: date-time
+          description: When the session expires
+          example: "2023-10-26T17:30:00Z"
+        lastAccessed:
+          type: string
+          format: date-time
+          description: When the session was last accessed
+          example: "2023-10-25T17:35:00Z"
+        ipAddress:
+          type: string
+          description: IP address of the client
+          example: "192.168.1.100"
+        userAgent:
+          type: string
+          description: Browser/client information
+          example: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message
+          example: "Invalid credentials"
+        success:
+          type: boolean
+          example: false
+
+security:
+  - BearerAuth: []

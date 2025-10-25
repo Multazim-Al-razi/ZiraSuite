@@ -1,0 +1,27 @@
+{
+  "project": "zira-suite-auth",
+  "features": {
+    "auth": {
+      "enabled": true,
+      "providers": ["email"]
+    },
+    "database": {
+      "enabled": true
+    },
+    "storage": {
+      "enabled": false
+    }
+  },
+  "auth": {
+    "email": {
+      "enabled": true,
+      "emailChange": true,
+      "doubleConfirmEmailChange": false,
+      "confirmEmail": true
+    },
+    "password": {
+      "min_length": 6,
+      "recommended_strength": 0.5
+    }
+  }
+}

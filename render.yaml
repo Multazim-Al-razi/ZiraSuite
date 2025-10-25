@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: zira-suite-auth
+    env: docker
+    region: oregon
+    plan: free
+    branch: main
+    dockerfilePath: Dockerfile
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: SUPABASE_URL
+        value: https://efoifbextrouwrutykiq.supabase.co
+      - key: SUPABASE_ANON_KEY
+        value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVmb2lmYmV4dHJvdXdydXR5a2lxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE0MDcyNDAsImV4cCI6MjA3Njk4MzI0MH0.j33oRZfPiJZ4oZu2ZiTBq67sZwRZrgItBnFuEeEaL7w
